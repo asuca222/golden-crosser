@@ -1,0 +1,26 @@
+name: Golden Cross Check
+
+on:
+  schedule:
+    # 平日 16:30 JST(= 07:30 UTC)。東証の引け後。
+    - cron: "30 7 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      test_notify:
+        description: "テスト通知だけ送る"
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python check_cross.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TEST_NOTIFY: ${{ inputs.test_notify }}
